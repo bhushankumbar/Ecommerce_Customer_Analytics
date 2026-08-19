@@ -89,6 +89,9 @@ Built an executive dashboard containing:
 - Customer Churn Status
 - Retention Cohort Matrix
 
+![E-commerce Dashboard Preview](dashboard/dashboard-preview.png)
+
+
 ## Key Business Insights
 
 ### 1. Customer retention is a major challenge
@@ -143,10 +146,4 @@ Credit cards account for approximately **78.34% of payment revenue**, while Bole
 | Average CLV | 6.34 |
 | Net Sales | ₹11.34M |
 
-## Note on Financial Metrics
-
-The project does not calculate accounting profit because the source dataset does not contain actual product cost information.
-
-Therefore, the project uses revenue and sales-based metrics rather than claiming an accounting profit figure.
-
-Customer Lifetime Value is an estimated analytical metric based on the available transaction data.
+.
