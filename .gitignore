@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Raw datasets
+data/raw/
+
+# Local SQLite database
+data/*.db
+
+# Power BI temporary/backup files
+*.pbit
+*.tmp
+
+# Intermediate processed datasets
+data/processed/category_translation.csv
+data/processed/customers.csv
+data/processed/geolocation.csv
+data/processed/order_items.csv
+data/processed/orders.csv
+data/processed/payments.csv
+data/processed/products.csv
+data/processed/reviews.csv
+data/processed/sellers.csv
