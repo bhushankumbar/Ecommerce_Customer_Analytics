@@ -137,13 +137,13 @@ Credit cards account for approximately **78.34% of payment revenue**, while Bole
 
 | Metric | Value |
 |---|---:|
-| Total Revenue | R₹13.59M |
+| Total Revenue | R$13.59M |
 | Total Customers | 96K |
 | Total Orders | 99K |
-| Average Order Value | R₹136.68 |
+| Average Order Value | R$136.68 |
 | Repeat Customer Rate | 3.12% |
 | Churn Rate | 71.13% |
 | Average CLV | R$141.44 |
-| Net Sales | R₹11.34M |
+| Net Sales | R$11.34M |
 
 .
