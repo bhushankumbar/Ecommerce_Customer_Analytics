@@ -102,9 +102,9 @@ This indicates a significant opportunity to improve customer retention and repea
 
 ### 2. A large portion of customers are early-stage or require attention
 
-Promising Customers represent approximately **28.12%** of the customer base, while Needs Attention represents approximately **19.08%**.
+Promising Customers represent approximately **34.82%** of the customer base, while Needs Attention represents approximately **22.59%**.
 
-Together, these segments account for approximately **47% of customers**, creating a substantial opportunity for conversion and re-engagement.
+Together, these segments account for approximately **57% of customers**, creating a substantial opportunity for conversion and re-engagement.
 
 ### 3. Repeat purchasing is low
 
@@ -112,13 +112,13 @@ The repeat customer rate is approximately **3.12%**, indicating that increasing 
 
 ### 4. High-value customers should be protected
 
-The analysis identifies approximately **14.57K Loyal Customers** and **6.74K Champions**.
+The analysis identifies approximately **752 Loyal Customers** and **1,002 Champions**, only about **1.8%** of all customers.
 
 These customer groups should receive loyalty-focused engagement to strengthen long-term customer relationships.
 
 ### 5. Revenue is concentrated in leading product categories
 
-The top three product categories — **Beleza Saúde, Relógios Presentes, and Cama Mesa Banho** — generate approximately **₹3.51M** in combined revenue.
+The top three product categories — **Beleza Saúde, Relógios Presentes, and Cama Mesa Banho** — generate approximately **R₹3.51M** in combined revenue.
 
 ### 6. Credit cards dominate payment revenue
 
@@ -137,13 +137,13 @@ Credit cards account for approximately **78.34% of payment revenue**, while Bole
 
 | Metric | Value |
 |---|---:|
-| Total Revenue | ₹13.59M |
+| Total Revenue | R₹13.59M |
 | Total Customers | 96K |
 | Total Orders | 99K |
-| Average Order Value | ₹136.68 |
+| Average Order Value | R₹136.68 |
 | Repeat Customer Rate | 3.12% |
 | Churn Rate | 71.13% |
-| Average CLV | 6.34 |
-| Net Sales | ₹11.34M |
+| Average CLV | R$141.44 |
+| Net Sales | R₹11.34M |
 
 .

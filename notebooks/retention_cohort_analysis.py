@@ -1,155 +1,54 @@
 import pandas as pd
 from pathlib import Path
 
-
-# ---------------------------------------------------------
-# 1. Paths
-# ---------------------------------------------------------
-
 DATA_PATH = Path("data/processed")
 OUTPUT_PATH = DATA_PATH / "retention_cohort_analysis.csv"
 
+# 1. Load ORDERS (one row per order) and customers
+orders = pd.read_csv(DATA_PATH / "orders.csv")
+customers = pd.read_csv(DATA_PATH / "customers.csv")
 
-# ---------------------------------------------------------
-# 2. Load customer behaviour data
-# ---------------------------------------------------------
-
-df = pd.read_csv(
-    DATA_PATH / "customer_behaviour.csv"
+orders["order_purchase_timestamp"] = pd.to_datetime(
+    orders["order_purchase_timestamp"], errors="coerce"
 )
 
-df["first_purchase"] = pd.to_datetime(
-    df["first_purchase"],
-    errors="coerce"
-)
+# 2. Attach the real person to every order
+df = orders.merge(
+    customers[["customer_id", "customer_unique_id"]],
+    on="customer_id", how="left"
+).dropna(subset=["order_purchase_timestamp"])
 
-df["last_purchase"] = pd.to_datetime(
-    df["last_purchase"],
-    errors="coerce"
-)
+# 3. Month of EVERY order, and month of each person's FIRST order (cohort)
+df["order_month"] = df["order_purchase_timestamp"].dt.to_period("M")
+first_order = df.groupby("customer_unique_id")["order_purchase_timestamp"].transform("min")
+df["cohort_month"] = first_order.dt.to_period("M")
 
-
-# ---------------------------------------------------------
-# 3. Create purchase month
-# ---------------------------------------------------------
-
-df["purchase_month"] = (
-    df["last_purchase"]
-    .dt.to_period("M")
-)
-
-
-# ---------------------------------------------------------
-# 4. Create customer cohort month
-# ---------------------------------------------------------
-
-df["cohort_month"] = (
-    df["first_purchase"]
-    .dt.to_period("M")
-)
-
-
-# ---------------------------------------------------------
-# 5. Calculate cohort index
-# ---------------------------------------------------------
-
+# 4. Months since the first order (1 = first month)
 df["cohort_index"] = (
-    (df["purchase_month"].dt.year - df["cohort_month"].dt.year) * 12
-    + (df["purchase_month"].dt.month - df["cohort_month"].dt.month)
+    (df["order_month"].dt.year - df["cohort_month"].dt.year) * 12
+    + (df["order_month"].dt.month - df["cohort_month"].dt.month)
     + 1
 )
 
-
-# ---------------------------------------------------------
-# 6. Count customers by cohort and month
-# ---------------------------------------------------------
-
+# 5. Unique customers who ordered in each (cohort, month)
 cohort_data = (
-    df.groupby(
-        ["cohort_month", "cohort_index"]
-    )["customer_unique_id"]
-    .nunique()
-    .reset_index(name="customer_count")
+    df.groupby(["cohort_month", "cohort_index"])["customer_unique_id"]
+    .nunique().reset_index(name="customer_count")
 )
 
-
-# ---------------------------------------------------------
-# 7. Calculate original cohort size
-# ---------------------------------------------------------
-
+# 6. True cohort size = everyone whose first order was that month
 cohort_sizes = (
-    cohort_data[
-        cohort_data["cohort_index"] == 1
-    ][
-        ["cohort_month", "customer_count"]
-    ]
-    .rename(
-        columns={
-            "customer_count": "cohort_size"
-        }
-    )
+    cohort_data[cohort_data["cohort_index"] == 1][["cohort_month", "customer_count"]]
+    .rename(columns={"customer_count": "cohort_size"})
 )
 
+cohort_data = cohort_data.merge(cohort_sizes, on="cohort_month", how="left")
+cohort_data["retention_rate"] = cohort_data["customer_count"] / cohort_data["cohort_size"]
 
-# ---------------------------------------------------------
-# 8. Calculate retention rate
-# ---------------------------------------------------------
-
-cohort_data = cohort_data.merge(
-    cohort_sizes,
-    on="cohort_month",
-    how="left"
-)
-
-# Store retention as a decimal:
-# 1.00 = 100%
-# 0.50 = 50%
-# 0.10 = 10%
-
-cohort_data["retention_rate"] = (
-    cohort_data["customer_count"]
-    / cohort_data["cohort_size"]
-)
-
-
-# ---------------------------------------------------------
-# 9. Clean output
-# ---------------------------------------------------------
-
-cohort_data["cohort_month"] = (
-    cohort_data["cohort_month"]
-    .astype(str)
-)
-
+cohort_data["cohort_month"] = cohort_data["cohort_month"].astype(str)
 cohort_data = cohort_data[
-    [
-        "cohort_month",
-        "cohort_index",
-        "customer_count",
-        "retention_rate"
-    ]
-].sort_values(
-    ["cohort_month", "cohort_index"]
-)
+    ["cohort_month", "cohort_index", "customer_count", "retention_rate"]
+].sort_values(["cohort_month", "cohort_index"])
 
-
-# ---------------------------------------------------------
-# 10. Display sample
-# ---------------------------------------------------------
-
-print("\nSample:")
-print(cohort_data.head(10))
-
-
-# ---------------------------------------------------------
-# 11. Save retention analysis
-# ---------------------------------------------------------
-
-cohort_data.to_csv(
-    OUTPUT_PATH,
-    index=False
-)
-
-print(
-    f"\nRetention analysis saved to: {OUTPUT_PATH}"
-)
+print(cohort_data)
+cohort_data.to_csv(OUTPUT_PATH, index=False)

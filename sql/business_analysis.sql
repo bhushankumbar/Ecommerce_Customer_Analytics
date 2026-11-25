@@ -48,21 +48,13 @@ FROM order_items;
 -- =========================================================
 
 SELECT
-    DATE_TRUNC(
-        'month',
-        order_purchase_timestamp
-    ) AS order_month,
-    ROUND(SUM(price), 2) AS monthly_revenue
+    strftime('%Y-%m', o.order_purchase_timestamp) AS order_month,
+    ROUND(SUM(oi.price), 2) AS monthly_revenue
 FROM orders o
 JOIN order_items oi
     ON o.order_id = oi.order_id
-GROUP BY
-    DATE_TRUNC(
-        'month',
-        order_purchase_timestamp
-    )
+GROUP BY strftime('%Y-%m', o.order_purchase_timestamp)
 ORDER BY order_month;
-
 
 -- =========================================================
 -- 6. Top 10 Products by Revenue
@@ -185,3 +177,56 @@ JOIN order_items oi
 GROUP BY c.customer_unique_id
 ORDER BY total_spending DESC
 LIMIT 10;
+
+-- =========================================================
+-- 15. Customer Spending Rank (CTE + Window Function)
+-- =========================================================
+
+WITH customer_spending AS (
+    SELECT
+        c.customer_unique_id,
+        COUNT(DISTINCT o.order_id) AS order_count,
+        ROUND(SUM(oi.price), 2) AS total_spending
+    FROM customers c
+    JOIN orders o
+        ON c.customer_id = o.customer_id
+    JOIN order_items oi
+        ON o.order_id = oi.order_id
+    GROUP BY c.customer_unique_id
+)
+SELECT
+    customer_unique_id,
+    order_count,
+    total_spending,
+    RANK() OVER (ORDER BY total_spending DESC) AS spending_rank
+FROM customer_spending
+ORDER BY spending_rank
+LIMIT 10;
+
+
+-- =========================================================
+-- 16. Month-over-Month Revenue Growth (CTE + LAG)
+-- =========================================================
+
+WITH monthly_revenue AS (
+    SELECT
+        strftime('%Y-%m', o.order_purchase_timestamp) AS order_month,
+        ROUND(SUM(oi.price), 2) AS revenue
+    FROM orders o
+    JOIN order_items oi
+        ON o.order_id = oi.order_id
+    GROUP BY strftime('%Y-%m', o.order_purchase_timestamp)
+)
+SELECT
+    order_month,
+    revenue,
+    LAG(revenue) OVER (ORDER BY order_month) AS previous_month_revenue,
+    ROUND(
+        (revenue - LAG(revenue) OVER (ORDER BY order_month)) * 100.0
+        / LAG(revenue) OVER (ORDER BY order_month),
+        2
+    ) AS growth_percent
+FROM monthly_revenue
+ORDER BY order_month;
+
+

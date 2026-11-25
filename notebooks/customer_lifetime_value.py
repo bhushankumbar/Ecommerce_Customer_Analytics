@@ -133,12 +133,14 @@ clv["estimated_lifetime_months"] = (
 # 11. Calculate estimated CLV
 # ---------------------------------------------------------
 
+# Historical CLV: average order value x number of orders
+# (the revenue each customer has actually generated).
+# The earlier version divided frequency by the dataset's ~25 months,
+# which made one-time buyers worth less than what they already paid.
 clv["estimated_clv"] = (
     clv["average_order_value"]
-    * clv["purchase_frequency"]
-    * clv["estimated_lifetime_months"]
+    * clv["total_orders"]
 )
-
 
 # ---------------------------------------------------------
 # 12. Handle invalid values

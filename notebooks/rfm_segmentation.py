@@ -73,11 +73,12 @@ rfm["R_score"] = pd.qcut(
     duplicates="drop"
 ).astype(int)
 
-rfm["F_score"] = pd.qcut(
-    rfm["frequency"].rank(method="first"),
-    q=5,
-    labels=[1, 2, 3, 4, 5]
-).astype(int)
+# Frequency is almost always 1 in this dataset (about 97% of customers
+# bought once), so quintiles cannot separate customers. Use fixed bands:
+# 1 = one order, 2 = two orders, 3 = three or more orders.
+rfm["F_score"] = rfm["frequency"].apply(
+    lambda x: 1 if x == 1 else (2 if x == 2 else 3)
+)
 
 rfm["M_score"] = pd.qcut(
     rfm["monetary"].rank(method="first"),
@@ -103,37 +104,42 @@ rfm["RFM_score"] = (
 
 def assign_segment(row):
 
+    # Repeat buyers (F >= 2) who bought recently and spent a lot
     if (
         row["R_score"] >= 4
-        and row["F_score"] >= 4
+        and row["F_score"] >= 2
         and row["M_score"] >= 4
     ):
         return "Champions"
 
+    # Repeat buyers with decent recency and spend
     elif (
         row["R_score"] >= 3
-        and row["F_score"] >= 3
+        and row["F_score"] >= 2
         and row["M_score"] >= 3
     ):
         return "Loyal Customers"
 
+    # Recent one-time buyers with decent spend
     elif (
         row["R_score"] >= 4
-        and row["F_score"] <= 2
+        and row["F_score"] == 1
         and row["M_score"] >= 3
     ):
         return "Potential Loyalists"
 
+    # Repeat buyers who have gone quiet
     elif (
         row["R_score"] <= 2
-        and row["F_score"] >= 3
+        and row["F_score"] >= 2
         and row["M_score"] >= 3
     ):
         return "At Risk"
 
+    # Old, one-time, low-spend buyers
     elif (
         row["R_score"] <= 2
-        and row["F_score"] <= 2
+        and row["F_score"] == 1
         and row["M_score"] <= 2
     ):
         return "Lost Customers"
@@ -144,7 +150,7 @@ def assign_segment(row):
     else:
         return "Needs Attention"
 
-
+    
 rfm["segment"] = rfm.apply(
     assign_segment,
     axis=1
